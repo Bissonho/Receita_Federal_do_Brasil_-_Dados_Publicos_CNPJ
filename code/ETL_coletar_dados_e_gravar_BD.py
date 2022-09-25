@@ -20,9 +20,10 @@ import zipfile
 def getEnv(env):
     return os.getenv(env)
 
-print('Especifique o local do seu arquivo de configuração ".env". Por exemplo: C:\...\Receita_Federal_do_Brasil_-_Dados_Publicos_CNPJ\code')
-# C:\Aphonso_C\Git\Receita_Federal_do_Brasil_-_Dados_Publicos_CNPJ\code
-local_env = input()
+#'Especifique o local do seu arquivo de configuração ".env". Por exemplo: C:\...\Receita_Federal_do_Brasil_-_Dados_Publicos_CNPJ\code')
+
+# C:\Users\Paulo\Documents\Projetos\Receita_Federal_do_Brasil_-_Dados_Publicos_CNPJ\code
+local_env = r"C:\Users\Paulo\Documents\Projetos\Receita_Federal_do_Brasil_-_Dados_Publicos_CNPJ\code"
 dotenv_path = Path(local_env+'\.env')
 load_dotenv(dotenv_path=dotenv_path)
 
@@ -51,11 +52,20 @@ html_str = str(page_items)
 # Obter arquivos
 Files = []
 text = '.zip'
+
+filesAlreadyDownloaded = []
+
 for m in re.finditer(text, html_str):
     i_start = m.start()-40
     i_end = m.end()
     i_loc = html_str[i_start:i_end].find('href=')+6
     Files.append(html_str[i_start+i_loc:i_end])
+
+
+#Verificar quais arquivos já foram baixados
+for _, _, arquivo in os.walk(output_files):
+        filesAlreadyDownloaded = arquivo
+        print(filesAlreadyDownloaded)
 
 # Correcao do nome dos arquivos devido a mudanca na estrutura do HTML da pagina - 31/07/22 - Aphonso Rafael
 Files_clean = []
@@ -69,12 +79,20 @@ except:
     pass
 
 Files = Files_clean
-
+print(Files)
 print('Arquivos que serão baixados:')
 i_f = 0
-for f in Files:
+i_z = 0
+for z in filesAlreadyDownloaded:
+    if z in Files:
+        Files.remove(z)
+        #print("Remove"+f)
     i_f += 1
-    print(str(i_f) + ' - ' + f)
+
+print(Files)
+
+
+
 
 #%%
 ########################################################################################################################
@@ -90,6 +108,8 @@ def bar_progress(current, total, width=80):
 #%%
 # Download arquivos ################################################################################################################################
 i_l = 0
+
+
 for l in Files:
     # Download dos arquivos
     i_l += 1
@@ -99,6 +119,7 @@ for l in Files:
     wget.download(url, out=output_files, bar=bar_progress)
 
 #%%
+
 # Download layout:
 Layout = 'https://www.gov.br/receitafederal/pt-br/assuntos/orientacao-tributaria/cadastros/consultas/arquivos/NOVOLAYOUTDOSDADOSABERTOSDOCNPJ.pdf'
 print('Baixando layout:')
